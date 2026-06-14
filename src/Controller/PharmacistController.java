@@ -58,14 +58,30 @@ public class PharmacistController {
         String quantity = quantityField.getText();
         String price = priceField.getText();
         String expiry = expiryField.getText();
-        String supplier = supplierField.getText();
+        String supplierId = supplierField.getText().trim();
 
-        if ( id.isEmpty() || name.isEmpty() || category.isEmpty() || quantity.isEmpty() || price.isEmpty() || expiry.isEmpty() || supplier.isEmpty()) {
+        if ( id.isEmpty() || name.isEmpty() || category.isEmpty() || quantity.isEmpty() || price.isEmpty() || expiry.isEmpty() || supplierId.isEmpty()) {
             showAlert("Please fill all fields ");
             return;
         }
-
-
+        String supplier = null;
+        String lookupSql = "SELECT name FROM suppliers WHERE id = ?";
+        try (PreparedStatement lookupPs = DBConnection.getConnection().prepareStatement(lookupSql)) {
+            lookupPs.setInt(1, Integer.parseInt(supplierId));
+            ResultSet rs = lookupPs.executeQuery();
+            if (rs.next()) {
+                supplier = rs.getString("name");
+            } else {
+                showAlert("No supplier found with ID: " + supplierId);
+                return;
+            }
+        } catch (NumberFormatException e) {
+            showAlert("Supplier ID must be a number.");
+            return;
+        } catch (SQLException e) {
+            showAlert("DB Error: " + e.getMessage());
+            return;
+        }
         String  sql = "INSERT INTO products( id,name, category, quantity, price, expiry_date, supplier) VALUES(?,?,?,?,?,?,?)";
         try {
             Connection conn = DBConnection.getConnection();

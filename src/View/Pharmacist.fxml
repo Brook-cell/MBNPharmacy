@@ -141,7 +141,7 @@
                   </VBox>
                   <VBox prefHeight="200.0" prefWidth="140.0">
                      <children>
-                        <Label text="Supplier" textFill="#4d6480">
+                        <Label text="Supplier ID" textFill="#4d6480">
                            <font>
                               <Font size="10.0" />
                            </font>
