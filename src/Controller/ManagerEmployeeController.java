@@ -1,6 +1,5 @@
 package Controller;
 
-
 import db.DBConnection;
 import Model.EmployeeModel;
 import javafx.collections.FXCollections;
@@ -15,8 +14,6 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import java.io.IOException;
-
-
 import java.sql.*;
 
 public class ManagerEmployeeController {
@@ -46,9 +43,8 @@ public class ManagerEmployeeController {
         }
 
         String sql ="INSERT INTO employees(id,name,role) VALUES(?,?,?)";
-        try {
-            Connection conn = DBConnection.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(sql);
+        try ( Connection conn = DBConnection.getConnection();
+              PreparedStatement stmt = conn.prepareStatement(sql);){
             stmt.setString(1, id);
             stmt.setString(2, name);
             stmt.setString(3, role);
@@ -72,9 +68,8 @@ public class ManagerEmployeeController {
             return;
         }
 
-        try {
-            Connection conn = DBConnection.getConnection();
-            PreparedStatement stmt = conn.prepareStatement("UPDATE employees SET name=?, role=? WHERE id=?");
+        try ( Connection conn = DBConnection.getConnection();
+              PreparedStatement stmt = conn.prepareStatement("UPDATE employees SET name=?, role=? WHERE id=?")){
             stmt.setString(1, name);
             stmt.setString(2, role);
             stmt.setString(3, id);
@@ -96,9 +91,8 @@ public class ManagerEmployeeController {
             return;
         }
 
-        try {
-            Connection conn = DBConnection.getConnection();
-            PreparedStatement stmt = conn.prepareStatement("DELETE FROM employees WHERE id=?");
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement("DELETE FROM employees WHERE id=?")){
             stmt.setString(1, id);
             stmt.executeUpdate();
             showSuccess("Employee deleted successfully!");
@@ -111,9 +105,8 @@ public class ManagerEmployeeController {
 
     public void loadTable() {
         ObservableList<EmployeeModel> list = FXCollections.observableArrayList();
-        try {
-            Connection conn = DBConnection.getConnection();
-            ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM employees");
+        try (Connection conn = DBConnection.getConnection();
+             ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM employees")){
             while (rs.next()) {
                 list.add(new EmployeeModel(
                         rs.getString("id"),

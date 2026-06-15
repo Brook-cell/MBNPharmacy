@@ -50,9 +50,8 @@ public class CashierProductController {
 
     private void loadTable() {
         ObservableList<ProductModel> list = FXCollections.observableArrayList();
-        try {
-            Connection conn = DBConnection.getConnection();
-            ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM products");
+        try ( Connection conn = DBConnection.getConnection();
+              ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM products")){
             while (rs.next()) {
                 list.add(new ProductModel(
                         rs.getString("id"),
@@ -77,10 +76,9 @@ public class CashierProductController {
             showAlert("Input Error", "Please enter a Product ID to search.");
             return;
         }
-        try {
+        String sql = "SELECT * FROM products WHERE id = ?";
+        try(PreparedStatement ps = DBConnection.getConnection().prepareStatement(sql)) {
             String searchId = input;
-            String sql = "SELECT * FROM products WHERE id = ?";
-            PreparedStatement ps = DBConnection.getConnection().prepareStatement(sql);
             ps.setString(1, searchId);
             ResultSet rs = ps.executeQuery();
 

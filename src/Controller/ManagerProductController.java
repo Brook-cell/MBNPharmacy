@@ -44,10 +44,8 @@ public class ManagerProductController {
 
     public void loadTable() {
         ObservableList<ProductModel> list = FXCollections.observableArrayList();
-        try {
-            Connection conn = DBConnection.getConnection();
-            ResultSet rs = conn.createStatement()
-                    .executeQuery("SELECT * FROM products");
+        try ( Connection conn = DBConnection.getConnection();
+              ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM products");){
             while (rs.next()) {
                 list.add(new ProductModel(
                         rs.getString("id"),

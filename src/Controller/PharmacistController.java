@@ -83,9 +83,8 @@ public class PharmacistController {
             return;
         }
         String  sql = "INSERT INTO products( id,name, category, quantity, price, expiry_date, supplier) VALUES(?,?,?,?,?,?,?)";
-        try {
-            Connection conn = DBConnection.getConnection();
-            PreparedStatement stmt= conn.prepareStatement(sql);
+        try( Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt= conn.prepareStatement(sql);) {
                 stmt.setString(1, id);
                 stmt.setString(2, name);
                 stmt.setString(3, category);
@@ -120,9 +119,8 @@ public class PharmacistController {
             return;
         }
 
-        try {
-            Connection conn = DBConnection.getConnection();
-            PreparedStatement stmt = conn.prepareStatement("UPDATE products SET name=?, category=?, quantity=?, price=?, expiry_date=?, supplier=? WHERE id=?");
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement("UPDATE products SET name=?, category=?, quantity=?, price=?, expiry_date=?, supplier=? WHERE id=?")){
             stmt.setString(1, name);
             stmt.setString(2, category);
             stmt.setInt(3, Integer.parseInt(quantity));
@@ -150,9 +148,8 @@ public class PharmacistController {
             return;
         }
 
-        try {
-            Connection conn = DBConnection.getConnection();
-            PreparedStatement stmt = conn.prepareStatement("DELETE FROM products WHERE id=?");
+        try ( Connection conn = DBConnection.getConnection();
+              PreparedStatement stmt = conn.prepareStatement("DELETE FROM products WHERE id=?")){
             stmt.setString(1, id);
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected > 0) {
@@ -177,11 +174,8 @@ public class PharmacistController {
             return;
         }
 
-        try {
-            Connection conn = DBConnection.getConnection();
-
-            // First, check current quantity
-            PreparedStatement checkStmt = conn.prepareStatement("SELECT quantity FROM products WHERE id=?");
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement checkStmt = conn.prepareStatement("SELECT quantity FROM products WHERE id=?")){
             checkStmt.setString(1, id);
             ResultSet rs = checkStmt.executeQuery();
 
@@ -193,10 +187,7 @@ public class PharmacistController {
                     showAlert("Insufficient stock! Available quantity: " + currentQty);
                     return;
                 }
-
                 int newQty = currentQty - qtyToSell;
-
-                // Update the quantity
                 PreparedStatement updateStmt = conn.prepareStatement("UPDATE products SET quantity=? WHERE id=?");
                 updateStmt.setInt(1, newQty);
                 updateStmt.setString(2, id);
@@ -218,9 +209,8 @@ public class PharmacistController {
 
     public void loadTable() {
         ObservableList<ProductModel> list = FXCollections.observableArrayList();
-        try {
-            Connection conn = DBConnection.getConnection();
-            ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM products");
+        try( Connection conn = DBConnection.getConnection();
+             ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM products")) {
             while (rs.next()) {
                 list.add(new ProductModel(
                         rs.getString("id"),

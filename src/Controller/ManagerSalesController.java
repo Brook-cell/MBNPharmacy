@@ -43,9 +43,8 @@ public class ManagerSalesController {
         ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
         String sql = "SELECT id, product_id, product_name, category, quantity_sold, price, sale_date " +
                 "FROM sales ORDER BY sale_date DESC";
-        try {
-            Statement st = DBConnection.getConnection().createStatement();
-            ResultSet rs = st.executeQuery(sql);
+        try ( Statement st = DBConnection.getConnection().createStatement();
+              ResultSet rs = st.executeQuery(sql);){
             while (rs.next()) {
                 ObservableList<String> row = FXCollections.observableArrayList();
                 row.add(String.valueOf(rs.getInt("id")));
