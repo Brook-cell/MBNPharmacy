@@ -37,13 +37,13 @@ public class CashierProductController {
 
     @FXML
     public void initialize() {
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        categoryColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
-        quantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-        priceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
-        expiryColumn.setCellValueFactory(new PropertyValueFactory<>("expiryDate"));
-        supplierColumn.setCellValueFactory(new PropertyValueFactory<>("supplier"));
+        idColumn.setCellValueFactory(c-> c.getValue().idProperty());
+        nameColumn.setCellValueFactory(c->c.getValue().nameProperty());
+        categoryColumn.setCellValueFactory(c->c.getValue().categoryProperty());
+        quantityColumn.setCellValueFactory(c->c.getValue().quantityProperty().asObject());
+        priceColumn.setCellValueFactory(c->c.getValue().priceProperty().asObject());
+        expiryColumn.setCellValueFactory(c->c.getValue().expiryDateProperty());
+        supplierColumn.setCellValueFactory(c->c.getValue().supplierProperty());
         loadTable();
     }
 
@@ -70,7 +70,7 @@ public class CashierProductController {
     }
 
     @FXML
-    private void handleSearch() {
+    private void handleSearch(ActionEvent event) {
         String input = searchIdField.getText().trim();
         if (input.isEmpty()) {
             showAlert("Input Error", "Please enter a Product ID to search.");
@@ -143,6 +143,7 @@ public class CashierProductController {
             showAlert("Success", "Sold " + sellAmount + " unit(s). Remaining stock: " + newQty);
             quantityField.setText(String.valueOf(newQty));
             sellAmountField.clear();
+            //clearFields();
             loadTable();
 
         } catch (NumberFormatException e) {

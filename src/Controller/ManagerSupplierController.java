@@ -37,8 +37,9 @@ public class ManagerSupplierController {
     private void loadTable() {
         ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
         String sql = "SELECT id, name, age, email, address FROM suppliers ORDER BY id";
-        try(Statement st = DBConnection.getConnection().createStatement();
-            ResultSet rs = st.executeQuery(sql);) {
+        try(Connection conn = DBConnection.getConnection();
+            Statement st = conn.createStatement();
+            ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 ObservableList<String> row = FXCollections.observableArrayList();
                 row.add(String.valueOf(rs.getInt("id")));
@@ -75,7 +76,7 @@ public class ManagerSupplierController {
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
-        } catch (IOException e) {
+        } catch (IOException e){
             e.printStackTrace();
         }
     }

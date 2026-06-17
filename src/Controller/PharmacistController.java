@@ -34,9 +34,7 @@ public class PharmacistController {
     @FXML private TableColumn<ProductModel, Double> priceColumn;
     @FXML private TableColumn<ProductModel, String> expiryColumn;
     @FXML private TableColumn<ProductModel, String> supplierColumn;
-
     private Stage stage;
-    private Scene scene;
 
     @FXML
     public void initialize() {
@@ -84,7 +82,7 @@ public class PharmacistController {
         }
         String  sql = "INSERT INTO products( id,name, category, quantity, price, expiry_date, supplier) VALUES(?,?,?,?,?,?,?)";
         try( Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt= conn.prepareStatement(sql);) {
+             PreparedStatement stmt= conn.prepareStatement(sql)) {
                 stmt.setString(1, id);
                 stmt.setString(2, name);
                 stmt.setString(3, category);
@@ -118,9 +116,9 @@ public class PharmacistController {
             showAlert("Please enter a Product ID to update.");
             return;
         }
-
+        String sql = "UPDATE products SET name=?, category=?, quantity=?, price=?, expiry_date=?, supplier=? WHERE id=?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement("UPDATE products SET name=?, category=?, quantity=?, price=?, expiry_date=?, supplier=? WHERE id=?")){
+             PreparedStatement stmt = conn.prepareStatement(sql)){
             stmt.setString(1, name);
             stmt.setString(2, category);
             stmt.setInt(3, Integer.parseInt(quantity));
@@ -164,53 +162,11 @@ public class PharmacistController {
         }
     }
 
-    @FXML
-    public void handleSell(ActionEvent event) {
-        String id = idField.getText();
-        String sellQuantity = quantityField.getText();
-
-        if (id.isEmpty() || sellQuantity.isEmpty()) {
-            showAlert("Please enter Product ID and Quantity to sell.");
-            return;
-        }
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement checkStmt = conn.prepareStatement("SELECT quantity FROM products WHERE id=?")){
-            checkStmt.setString(1, id);
-            ResultSet rs = checkStmt.executeQuery();
-
-            if (rs.next()) {
-                int currentQty = rs.getInt("quantity");
-                int qtyToSell = Integer.parseInt(sellQuantity);
-
-                if (qtyToSell > currentQty) {
-                    showAlert("Insufficient stock! Available quantity: " + currentQty);
-                    return;
-                }
-                int newQty = currentQty - qtyToSell;
-                PreparedStatement updateStmt = conn.prepareStatement("UPDATE products SET quantity=? WHERE id=?");
-                updateStmt.setInt(1, newQty);
-                updateStmt.setString(2, id);
-                updateStmt.executeUpdate();
-
-                showSuccess("Sold " + qtyToSell + " units! Remaining stock: " + newQty);
-            } else {
-                showAlert("Product with ID " + id + " not found.");
-            }
-
-            clearFields();
-            loadTable();
-        } catch (SQLException e) {
-            showAlert("Error: " + e.getMessage());
-        } catch (NumberFormatException e) {
-            showAlert("Please enter a valid number for quantity.");
-        }
-    }
-
     public void loadTable() {
         ObservableList<ProductModel> list = FXCollections.observableArrayList();
         try( Connection conn = DBConnection.getConnection();
-             ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM products")) {
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT * FROM products")) {
             while (rs.next()) {
                 list.add(new ProductModel(
                         rs.getString("id"),
@@ -240,11 +196,15 @@ public class PharmacistController {
         }
     }
     @FXML
-    public void switchtoLogout(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("/View/Login.fxml"));
-        stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        stage.setScene(new Scene(root));
-        stage.show();
+    public void switchtoLogout(ActionEvent event) {
+        try{
+            Parent root = FXMLLoader.load(getClass().getResource("/View/Login.fxml"));
+            stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
     }
 
     private void clearFields() {

@@ -8,6 +8,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
+import javafx.stage.Window;
+
 import java.io.IOException;
 public class LoginController {
 
@@ -31,7 +33,7 @@ public class LoginController {
         }
 
         boolean correct = switch (role) {
-            case "Manager"    -> password.equals("admin");
+            case "Manager" -> password.equals("admin");
             case "Pharmacist" -> password.equals("pharma123");
             case "Cashier" -> password.equals("cash12");
             default -> false;

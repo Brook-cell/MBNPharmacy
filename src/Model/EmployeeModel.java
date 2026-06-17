@@ -13,12 +13,24 @@ public class EmployeeModel {
         this.role = new SimpleStringProperty(role);
     }
 
-    public String getId() {return id.get(); }
-    public String getName() { return name.get(); }
-    public String getRole() { return role.get(); }
+    public String getId() {
+        return id.get();
+    }
+    public String getName() {
+        return name.get();
+    }
+    public String getRole() {
+        return role.get();
+    }
 
-    public SimpleStringProperty idProperty() { return id; }
-    public SimpleStringProperty nameProperty() { return name; }
-    public SimpleStringProperty roleProperty() { return role; }
+    public SimpleStringProperty idProperty() {
+        return id;
+    }
+    public SimpleStringProperty nameProperty() {
+        return name;
+    }
+    public SimpleStringProperty roleProperty() {
+        return role;
+    }
 }
 

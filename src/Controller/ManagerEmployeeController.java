@@ -25,10 +25,7 @@ public class ManagerEmployeeController {
     @FXML private TableColumn<EmployeeModel, String> idColumn;
     @FXML private TableColumn<EmployeeModel, String> nameColumn;
     @FXML private TableColumn<EmployeeModel, String> roleColumn;
-
     private Stage stage;
-    private Scene scene;
-
 
 
     @FXML
@@ -44,7 +41,7 @@ public class ManagerEmployeeController {
 
         String sql ="INSERT INTO employees(id,name,role) VALUES(?,?,?)";
         try ( Connection conn = DBConnection.getConnection();
-              PreparedStatement stmt = conn.prepareStatement(sql);){
+              PreparedStatement stmt = conn.prepareStatement(sql)){
             stmt.setString(1, id);
             stmt.setString(2, name);
             stmt.setString(3, role);
@@ -52,7 +49,8 @@ public class ManagerEmployeeController {
             showSuccess("Employee added successfully!");
             clearFields();
             loadTable();
-        } catch (SQLException e) {
+
+        } catch (SQLException e){
             showAlert("Error: " + e.getMessage());
         }
     }
@@ -99,13 +97,15 @@ public class ManagerEmployeeController {
             clearFields();
             loadTable();
         } catch (SQLException e) {
-            showAlert("Error: " + e.getMessage());
+
         }
     }
 
     public void loadTable() {
         ObservableList<EmployeeModel> list = FXCollections.observableArrayList();
         try (Connection conn = DBConnection.getConnection();
+//             Statement stmt = conn.createStatement();
+//             ResultSet rs = stmt.executeQuery("SELECT * FROM employees");
              ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM employees")){
             while (rs.next()) {
                 list.add(new EmployeeModel(
@@ -116,6 +116,7 @@ public class ManagerEmployeeController {
             }
             tableView.setItems(list);
         } catch (SQLException e) {
+            showAlert("Error: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -152,7 +153,7 @@ public class ManagerEmployeeController {
     private void switchToSuppliers(ActionEvent event) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/View/ManagerSuppliers.fxml"));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
@@ -163,7 +164,7 @@ public class ManagerEmployeeController {
     private void switchToSales(ActionEvent event) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/View/ManagerSales.fxml"));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
@@ -174,7 +175,7 @@ public class ManagerEmployeeController {
     public void switchtoProducts(ActionEvent event) {
         try{
         Parent root = FXMLLoader.load(getClass().getResource("/View/ManagerProduct.fxml"));
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.setScene(new Scene(root));
         stage.show();
         }

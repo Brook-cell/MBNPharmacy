@@ -72,8 +72,6 @@
    <center>
       <VBox spacing="14.0" style="-fx-background-color: #0a1628; -fx-padding: 16 20 16 20; -fx-spacing: 14;" BorderPane.alignment="CENTER">
          <children>
-
-            <!-- Search Row -->
             <Label text="Search Product" textFill="WHITE">
                <font>
                   <Font size="13.0" />
@@ -104,7 +102,6 @@
                </children>
             </HBox>
 
-            <!-- Product Details (read-only) -->
             <Label text="Product Details" textFill="WHITE">
                <font>
                   <Font size="13.0" />
@@ -155,7 +152,6 @@
                </children>
             </HBox>
 
-            <!-- Sell Row -->
             <HBox prefHeight="56.0" prefWidth="680.0" spacing="10.0">
                <children>
                   <VBox prefHeight="200.0" prefWidth="120.0">
@@ -176,8 +172,6 @@
                   </VBox>
                </children>
             </HBox>
-
-            <!-- Product Table -->
             <VBox prefHeight="223.0" prefWidth="680.0" style="-fx-background-color: #0f2040; -fx-border-color: #1e3a5f; -fx-border-radius: 8; -fx-background-radius: 8;">
                <children>
                   <Label style="-fx-border-color: #1e3a5f; -fx-border-width: 0 0 1 0;" text="Product Inventory" textFill="WHITE">

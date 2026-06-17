@@ -26,9 +26,7 @@ public class ManagerProductController {
     @FXML private TableColumn<ProductModel, Double> priceColumn;
     @FXML private TableColumn<ProductModel, String> expiryColumn;
     @FXML private TableColumn<ProductModel, String> supplierColumn;
-
     private Stage stage;
-    private Scene scene;
 
     @FXML
     public void initialize() {
@@ -45,7 +43,7 @@ public class ManagerProductController {
     public void loadTable() {
         ObservableList<ProductModel> list = FXCollections.observableArrayList();
         try ( Connection conn = DBConnection.getConnection();
-              ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM products");){
+              ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM products")){
             while (rs.next()) {
                 list.add(new ProductModel(
                         rs.getString("id"),
@@ -87,19 +85,28 @@ public class ManagerProductController {
     }
 
     @FXML
-    public void switchtoEmployees(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("/View/Manager.fxml"));
-        stage = (Stage) ((Node)event.getSource()).getScene().getWindow();
-        stage.setScene(new Scene(root));
-        stage.show();
+    public void switchtoEmployees(ActionEvent event) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/View/Manager.fxml"));
+            stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
     }
 
     @FXML
-    public void switchtoLogout(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("/View/Login.fxml"));
-        stage = (Stage) ((Node)event.getSource()).getScene().getWindow();
-        stage.setScene(new Scene(root));
-        stage.show();
+    public void switchtoLogout(ActionEvent event) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/View/Login.fxml"));
+            stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

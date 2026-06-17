@@ -13,9 +13,7 @@ public class ProductModel {
     private SimpleStringProperty expiryDate;
     private SimpleStringProperty supplier;
 
-    public ProductModel(String id, String name, String category,
-                        int quantity, double price,
-                        String expiryDate, String supplier) {
+    public ProductModel(String id, String name, String category, int quantity, double price, String expiryDate, String supplier) {
         this.id = new SimpleStringProperty(id);
         this.name = new SimpleStringProperty(name);
         this.category = new SimpleStringProperty(category);

@@ -17,7 +17,7 @@ import java.sql.*;
 
 public class CashierSalesController {
 
-    @FXML private TableView<ObservableList<String>>       tableView;
+    @FXML private TableView<ObservableList<String>> tableView;
     @FXML private TableColumn<ObservableList<String>, String> idColumn;
     @FXML private TableColumn<ObservableList<String>, String> productIdColumn;
     @FXML private TableColumn<ObservableList<String>, String> productNameColumn;
@@ -28,7 +28,6 @@ public class CashierSalesController {
 
     @FXML
     public void initialize() {
-
         idColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get(0)));
         productIdColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get(1)));
         productNameColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get(2)));
@@ -41,10 +40,9 @@ public class CashierSalesController {
 
     private void loadTable() {
         ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
-        String sql = "SELECT id, product_id, product_name, category, quantity_sold, price, sale_date " +
-                "FROM sales ORDER BY sale_date DESC";
+        String sql = "SELECT id, product_id, product_name, category, quantity_sold, price, sale_date FROM sales ORDER BY sale_date DESC";
         try (Statement st = DBConnection.getConnection().createStatement();
-             ResultSet rs = st.executeQuery(sql)){
+             ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 ObservableList<String> row = FXCollections.observableArrayList();
                 row.add(String.valueOf(rs.getInt("id")));

@@ -35,7 +35,6 @@ public class ManagerSalesController {
         quantitySoldColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get(4)));
         priceColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get(5)));
         saleDateColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get(6)));
-
         loadTable();
     }
 
@@ -43,8 +42,9 @@ public class ManagerSalesController {
         ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
         String sql = "SELECT id, product_id, product_name, category, quantity_sold, price, sale_date " +
                 "FROM sales ORDER BY sale_date DESC";
-        try ( Statement st = DBConnection.getConnection().createStatement();
-              ResultSet rs = st.executeQuery(sql);){
+        try ( Connection conn = DBConnection.getConnection();
+              Statement st = conn.createStatement();
+              ResultSet rs = st.executeQuery(sql)){
             while (rs.next()) {
                 ObservableList<String> row = FXCollections.observableArrayList();
                 row.add(String.valueOf(rs.getInt("id")));
