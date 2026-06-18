@@ -82,8 +82,6 @@ try (Connection conn = DBConnection.getConnection();
         }
 
         int newQty = currentQty - quantityToSell;
-
-
         String updateSql = "UPDATE products SET quantity=? WHERE id=?";
         PreparedStatement updateStmt = conn.prepareStatement(updateSql);
         updateStmt.setInt(1, newQty);

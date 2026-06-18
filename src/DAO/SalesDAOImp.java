@@ -8,23 +8,6 @@ import java.util.List;
 
 public class SalesDAOImp implements SalesDAO {
 
-@Override
-public boolean addSale(SalesModel sale) {
-    String sql = "INSERT INTO sales(product_id, product_name, category, quantity_sold, price) VALUES(?, ?, ?, ?, ?)";
-    try (Connection conn = DBConnection.getConnection();
-         PreparedStatement stmt = conn.prepareStatement(sql)) {
-        stmt.setString(1, sale.getProductId());
-        stmt.setString(2, sale.getProductName());
-        stmt.setString(3, sale.getCategory());
-        stmt.setInt(4, sale.getQuantitySold());
-        stmt.setDouble(5, sale.getPrice());
-        int rows = stmt.executeUpdate();
-        return rows > 0;
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
-    return false;
-}
 
 @Override
 public List<SalesModel> getAllSales() {
