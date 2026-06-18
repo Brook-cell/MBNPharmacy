@@ -1,7 +1,8 @@
 package Controller;
 
-import db.DBConnection;
-import javafx.beans.property.SimpleStringProperty;
+import DAO.SupplierDAO;
+import DAO.SupplierDAOImp;
+import Model.SupplierModel;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -13,49 +14,35 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 import java.io.IOException;
-import java.sql.*;
 
 public class ManagerSupplierController {
 
-    @FXML private TableView<ObservableList<String>>           tableView;
-    @FXML private TableColumn<ObservableList<String>, String> idColumn;
-    @FXML private TableColumn<ObservableList<String>, String> nameColumn;
-    @FXML private TableColumn<ObservableList<String>, String> ageColumn;
-    @FXML private TableColumn<ObservableList<String>, String> emailColumn;
-    @FXML private TableColumn<ObservableList<String>, String> addressColumn;
+    @FXML private TableView<SupplierModel> tableView;
+    @FXML private TableColumn<SupplierModel, Integer> idColumn;
+    @FXML private TableColumn<SupplierModel, String>  nameColumn;
+    @FXML private TableColumn<SupplierModel, String>  ageColumn;
+    @FXML private TableColumn<SupplierModel, String>  addressColumn;
+    @FXML private TableColumn<SupplierModel, String>  emailColumn;
+    @FXML private TableColumn<SupplierModel, String>  phoneColumn;
+
+    SupplierDAO dao = new SupplierDAOImp();
 
     @FXML
     public void initialize() {
-        idColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get(0)));
-        nameColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get(1)));
-        ageColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get(2)));
-        emailColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get(3)));
-        addressColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get(4)));
+        idColumn.setCellValueFactory(c -> c.getValue().idProperty().asObject());
+        nameColumn.setCellValueFactory(c -> c.getValue().nameProperty());
+        ageColumn.setCellValueFactory(c -> c.getValue().ageProperty());
+        addressColumn.setCellValueFactory(c -> c.getValue().addressProperty());
+        emailColumn.setCellValueFactory(c -> c.getValue().emailProperty());
+        phoneColumn.setCellValueFactory(c -> c.getValue().phoneProperty());
         loadTable();
     }
 
     private void loadTable() {
-        ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
-        String sql = "SELECT id, name, age, email, address FROM suppliers ORDER BY id";
-        try(Connection conn = DBConnection.getConnection();
-            Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery(sql)) {
-            while (rs.next()) {
-                ObservableList<String> row = FXCollections.observableArrayList();
-                row.add(String.valueOf(rs.getInt("id")));
-                row.add(rs.getString("name"));
-                row.add(rs.getString("age"));
-                row.add(rs.getString("email"));
-                row.add(rs.getString("address"));
-                data.add(row);
-            }
-            tableView.setItems(data);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            showAlert("DB Error", "Could not load suppliers: " + e.getMessage());
-        }
+        ObservableList<SupplierModel> list = FXCollections.observableArrayList();
+        list.addAll(dao.getAllSuppliers());
+        tableView.setItems(list);
     }
-
 
     @FXML
     private void switchToEmployees(ActionEvent event) {
@@ -76,7 +63,7 @@ public class ManagerSupplierController {
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

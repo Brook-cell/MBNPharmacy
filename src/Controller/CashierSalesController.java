@@ -1,7 +1,8 @@
 package Controller;
 
-import db.DBConnection;
-import javafx.beans.property.SimpleStringProperty;
+import DAO.SalesDAO;
+import DAO.SalesDAOImp;
+import Model.SalesModel;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -13,52 +14,36 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 import java.io.IOException;
-import java.sql.*;
 
 public class CashierSalesController {
 
-    @FXML private TableView<ObservableList<String>> tableView;
-    @FXML private TableColumn<ObservableList<String>, String> idColumn;
-    @FXML private TableColumn<ObservableList<String>, String> productIdColumn;
-    @FXML private TableColumn<ObservableList<String>, String> productNameColumn;
-    @FXML private TableColumn<ObservableList<String>, String> categoryColumn;
-    @FXML private TableColumn<ObservableList<String>, String> quantitySoldColumn;
-    @FXML private TableColumn<ObservableList<String>, String> priceColumn;
-    @FXML private TableColumn<ObservableList<String>, String> saleDateColumn;
+    @FXML private TableView<SalesModel> tableView;
+    @FXML private TableColumn<SalesModel, Integer> idColumn;
+    @FXML private TableColumn<SalesModel, String>  productIdColumn;
+    @FXML private TableColumn<SalesModel, String>  productNameColumn;
+    @FXML private TableColumn<SalesModel, String>  categoryColumn;
+    @FXML private TableColumn<SalesModel, Integer> quantitySoldColumn;
+    @FXML private TableColumn<SalesModel, Double>  priceColumn;
+    @FXML private TableColumn<SalesModel, String>  saleDateColumn;
+
+    SalesDAO dao = new SalesDAOImp();
 
     @FXML
     public void initialize() {
-        idColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get(0)));
-        productIdColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get(1)));
-        productNameColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get(2)));
-        categoryColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get(3)));
-        quantitySoldColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get(4)));
-        priceColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get(5)));
-        saleDateColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get(6)));
+        idColumn.setCellValueFactory(c -> c.getValue().idProperty().asObject());
+        productIdColumn.setCellValueFactory(c -> c.getValue().productIdProperty());
+        productNameColumn.setCellValueFactory(c -> c.getValue().productNameProperty());
+        categoryColumn.setCellValueFactory(c -> c.getValue().categoryProperty());
+        quantitySoldColumn.setCellValueFactory(c -> c.getValue().quantitySoldProperty().asObject());
+        priceColumn.setCellValueFactory(c -> c.getValue().priceProperty().asObject());
+        saleDateColumn.setCellValueFactory(c -> c.getValue().saleDateProperty());
         loadTable();
     }
 
     private void loadTable() {
-        ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
-        String sql = "SELECT id, product_id, product_name, category, quantity_sold, price, sale_date FROM sales ORDER BY sale_date DESC";
-        try (Statement st = DBConnection.getConnection().createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
-            while (rs.next()) {
-                ObservableList<String> row = FXCollections.observableArrayList();
-                row.add(String.valueOf(rs.getInt("id")));
-                row.add(rs.getString("product_id"));
-                row.add(rs.getString("product_name"));
-                row.add(rs.getString("category"));
-                row.add(String.valueOf(rs.getInt("quantity_sold")));
-                row.add(String.valueOf(rs.getDouble("price")));
-                row.add(rs.getString("sale_date"));
-                data.add(row);
-            }
-            tableView.setItems(data);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            showAlert("DB Error", "Could not load sales: " + e.getMessage());
-        }
+        ObservableList<SalesModel> list = FXCollections.observableArrayList();
+        list.addAll(dao.getAllSales());
+        tableView.setItems(list);
     }
 
     @FXML

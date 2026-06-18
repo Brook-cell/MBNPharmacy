@@ -1,7 +1,9 @@
 package Controller;
 
-import db.DBConnection;
+import DAO.ProductDAO;
+import DAO.ProductDAOImp;
 import Model.ProductModel;
+import db.DBConnection;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -27,14 +29,16 @@ public class PharmacistController {
     @FXML private TextField supplierField;
 
     @FXML private TableView<ProductModel> tableView;
-    @FXML private TableColumn<ProductModel, String> idColumn;
-    @FXML private TableColumn<ProductModel, String> nameColumn;
-    @FXML private TableColumn<ProductModel, String> categoryColumn;
+    @FXML private TableColumn<ProductModel, String>  idColumn;
+    @FXML private TableColumn<ProductModel, String>  nameColumn;
+    @FXML private TableColumn<ProductModel, String>  categoryColumn;
     @FXML private TableColumn<ProductModel, Integer> quantityColumn;
-    @FXML private TableColumn<ProductModel, Double> priceColumn;
-    @FXML private TableColumn<ProductModel, String> expiryColumn;
-    @FXML private TableColumn<ProductModel, String> supplierColumn;
+    @FXML private TableColumn<ProductModel, Double>  priceColumn;
+    @FXML private TableColumn<ProductModel, String>  expiryColumn;
+    @FXML private TableColumn<ProductModel, String>  supplierColumn;
+
     private Stage stage;
+    ProductDAO dao = new ProductDAOImp();
 
     @FXML
     public void initialize() {
@@ -50,21 +54,23 @@ public class PharmacistController {
 
     @FXML
     public void handleAdd(ActionEvent event) {
-        String id = idField.getText();
-        String name = nameField.getText();
+        String id       = idField.getText();
+        String name     = nameField.getText();
         String category = categoryField.getText();
         String quantity = quantityField.getText();
-        String price = priceField.getText();
-        String expiry = expiryField.getText();
+        String price    = priceField.getText();
+        String expiry   = expiryField.getText();
         String supplierId = supplierField.getText().trim();
 
-        if ( id.isEmpty() || name.isEmpty() || category.isEmpty() || quantity.isEmpty() || price.isEmpty() || expiry.isEmpty() || supplierId.isEmpty()) {
-            showAlert("Please fill all fields ");
+        if (id.isEmpty() || name.isEmpty() || category.isEmpty() || quantity.isEmpty() || price.isEmpty() || expiry.isEmpty() || supplierId.isEmpty()) {
+            showAlert("Please fill all fields.");
             return;
         }
+
         String supplier = null;
         String lookupSql = "SELECT name FROM suppliers WHERE id = ?";
-        try (PreparedStatement lookupPs = DBConnection.getConnection().prepareStatement(lookupSql)) {
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement lookupPs = conn.prepareStatement(lookupSql)) {
             lookupPs.setInt(1, Integer.parseInt(supplierId));
             ResultSet rs = lookupPs.executeQuery();
             if (rs.next()) {
@@ -80,23 +86,21 @@ public class PharmacistController {
             showAlert("DB Error: " + e.getMessage());
             return;
         }
-        String  sql = "INSERT INTO products( id,name, category, quantity, price, expiry_date, supplier) VALUES(?,?,?,?,?,?,?)";
-        try( Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt= conn.prepareStatement(sql)) {
-                stmt.setString(1, id);
-                stmt.setString(2, name);
-                stmt.setString(3, category);
-                stmt.setInt(4, Integer.parseInt(quantity));
-                stmt.setDouble(5, Double.parseDouble(price));
-                stmt.setString(6, expiry);
-                stmt.setString(7, supplier);
 
-            stmt.executeUpdate();
-            showSuccess("Product added successfully!");
-            clearFields();
-            loadTable();
-        } catch (SQLException e) {
-            showAlert("Error: " + e.getMessage());
+        try {
+            ProductModel product = new ProductModel(
+                    id, name, category,
+                    Integer.parseInt(quantity),
+                    Double.parseDouble(price),
+                    expiry, supplier
+            );
+            if (dao.addProduct(product)) {
+                showSuccess("Product added successfully!");
+                clearFields();
+                loadTable();
+            } else {
+                showAlert("Failed to add product.");
+            }
         } catch (NumberFormatException e) {
             showAlert("Please enter valid numbers for Quantity and Price.");
         }
@@ -105,33 +109,30 @@ public class PharmacistController {
     @FXML
     public void handleUpdate(ActionEvent event) {
         String id = idField.getText();
-        String name = nameField.getText();
+        String name  = nameField.getText();
         String category = categoryField.getText();
         String quantity = quantityField.getText();
-        String price = priceField.getText();
-        String expiry = expiryField.getText();
+        String price= priceField.getText();
+        String expiry= expiryField.getText();
         String supplier = supplierField.getText();
 
         if (id.isEmpty()) {
             showAlert("Please enter a Product ID to update.");
             return;
         }
-        String sql = "UPDATE products SET name=?, category=?, quantity=?, price=?, expiry_date=?, supplier=? WHERE id=?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)){
-            stmt.setString(1, name);
-            stmt.setString(2, category);
-            stmt.setInt(3, Integer.parseInt(quantity));
-            stmt.setDouble(4, Double.parseDouble(price));
-            stmt.setString(5, expiry);
-            stmt.setString(6, supplier);
-            stmt.setString(7, id);
-            stmt.executeUpdate();
-            showSuccess("Product updated successfully!");
-            clearFields();
-            loadTable();
-        } catch (SQLException e) {
-            showAlert("Error: " + e.getMessage());
+
+        try {
+            ProductModel product = new ProductModel(id, name, category, Integer.parseInt(quantity),
+                    Double.parseDouble(price),
+                    expiry, supplier
+            );
+            if (dao.updateProduct(product)) {
+                showSuccess("Product updated successfully!");
+                clearFields();
+                loadTable();
+            } else {
+                showAlert("Failed to update product.");
+            }
         } catch (NumberFormatException e) {
             showAlert("Please enter valid numbers for Quantity and Price.");
         }
@@ -140,50 +141,49 @@ public class PharmacistController {
     @FXML
     public void handleDelete(ActionEvent event) {
         String id = idField.getText();
-
         if (id.isEmpty()) {
             showAlert("Please enter a Product ID to delete.");
             return;
         }
-
-        try ( Connection conn = DBConnection.getConnection();
-              PreparedStatement stmt = conn.prepareStatement("DELETE FROM products WHERE id=?")){
-            stmt.setString(1, id);
-            int rowsAffected = stmt.executeUpdate();
-            if (rowsAffected > 0) {
-                showSuccess("Product deleted successfully!");
-            } else {
-                showAlert("Product with ID " + id + " not found.");
-            }
+        if (dao.deleteProduct(id)) {
+            showSuccess("Product deleted successfully!");
             clearFields();
             loadTable();
-        } catch (SQLException e) {
-            showAlert("Error: " + e.getMessage());
+        } else {
+            showAlert("Product with ID " + id + " not found.");
+        }
+    }
+
+    @FXML
+    public void handleSell(ActionEvent event) {
+        String id = idField.getText();
+        String sellQuantity = quantityField.getText();
+
+        if (id.isEmpty() || sellQuantity.isEmpty()) {
+            showAlert("Please enter Product ID and Quantity to sell.");
+            return;
+        }
+
+        try {
+            int qtyToSell = Integer.parseInt(sellQuantity);
+            if (dao.sellProduct(id, qtyToSell)) {
+                showSuccess("Sold " + qtyToSell + " units successfully!");
+                clearFields();
+                loadTable();
+            } else {
+                showAlert("Insufficient stock or product not found.");
+            }
+        } catch (NumberFormatException e) {
+            showAlert("Please enter a valid number for quantity.");
         }
     }
 
     public void loadTable() {
         ObservableList<ProductModel> list = FXCollections.observableArrayList();
-        try( Connection conn = DBConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT * FROM products")) {
-            while (rs.next()) {
-                list.add(new ProductModel(
-                        rs.getString("id"),
-                        rs.getString("name"),
-                        rs.getString("category"),
-                        rs.getInt("quantity"),
-                        rs.getDouble("price"),
-                        rs.getString("expiry_date"),
-                        rs.getString("supplier")
-                ));
-            }
-            tableView.setItems(list);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            showAlert("Error loading products: " + e.getMessage());
-        }
+        list.addAll(dao.getAllProducts());
+        tableView.setItems(list);
     }
+
     @FXML
     private void switchToSales(ActionEvent event) {
         try {
@@ -195,14 +195,15 @@ public class PharmacistController {
             e.printStackTrace();
         }
     }
+
     @FXML
     public void switchtoLogout(ActionEvent event) {
-        try{
+        try {
             Parent root = FXMLLoader.load(getClass().getResource("/View/Login.fxml"));
             stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -217,25 +218,19 @@ public class PharmacistController {
         supplierField.clear();
     }
 
-
     private void showAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("❌ Error");
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
-        }
+    }
+
     private void showSuccess(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("✅ Success");
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
-        }
-
-
+    }
 }
-
-
-
-

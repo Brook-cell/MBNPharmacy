@@ -24,7 +24,7 @@
                   <Insets bottom="4.0" left="16.0" right="16.0" top="10.0" />
                </padding>
             </Label>
-            <Button mnemonicParsing="false" style="-fx-background-color: transparent; -fx-pref-width: 180;" text="👥 Employees" onAction="#switchtoEmployees" textFill="#8fa3bf">
+            <Button mnemonicParsing="false" style="-fx-background-color: transparent; -fx-pref-width: 180;" text="👥 Employees" onAction="#switchToEmployees" textFill="#8fa3bf">
                <VBox.margin>
                   <Insets />
                </VBox.margin>

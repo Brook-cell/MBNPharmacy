@@ -1,6 +1,7 @@
 package Controller;
 
-import db.DBConnection;
+import DAO.EmployeeDAO;
+import DAO.EmployeeDAOImp;
 import Model.EmployeeModel;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -14,7 +15,6 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import java.io.IOException;
-import java.sql.*;
 
 public class ManagerEmployeeController {
 
@@ -28,6 +28,16 @@ public class ManagerEmployeeController {
     private Stage stage;
 
 
+    EmployeeDAO dao = new EmployeeDAOImp();
+
+    @FXML
+    public void initialize() {
+        idColumn.setCellValueFactory(c -> c.getValue().idProperty());
+        nameColumn.setCellValueFactory(c -> c.getValue().nameProperty());
+        roleColumn.setCellValueFactory(c -> c.getValue().roleProperty());
+        loadTable();
+    }
+
     @FXML
     public void handleAdd(ActionEvent event) {
         String id = idField.getText();
@@ -39,19 +49,13 @@ public class ManagerEmployeeController {
             return;
         }
 
-        String sql ="INSERT INTO employees(id,name,role) VALUES(?,?,?)";
-        try ( Connection conn = DBConnection.getConnection();
-              PreparedStatement stmt = conn.prepareStatement(sql)){
-            stmt.setString(1, id);
-            stmt.setString(2, name);
-            stmt.setString(3, role);
-            stmt.executeUpdate();
+        EmployeeModel employee = new EmployeeModel(id, name, role);
+        if (dao.addEmployee(employee)) {
             showSuccess("Employee added successfully!");
             clearFields();
             loadTable();
-
-        } catch (SQLException e){
-            showAlert("Error: " + e.getMessage());
+        } else {
+            showAlert("Failed to add employee.");
         }
     }
 
@@ -66,17 +70,13 @@ public class ManagerEmployeeController {
             return;
         }
 
-        try ( Connection conn = DBConnection.getConnection();
-              PreparedStatement stmt = conn.prepareStatement("UPDATE employees SET name=?, role=? WHERE id=?")){
-            stmt.setString(1, name);
-            stmt.setString(2, role);
-            stmt.setString(3, id);
-            stmt.executeUpdate();
+        EmployeeModel employee = new EmployeeModel(id, name, role);
+        if (dao.updateEmployee(employee)) {
             showSuccess("Employee updated successfully!");
             clearFields();
             loadTable();
-        } catch (SQLException e) {
-            showAlert("Error: " + e.getMessage());
+        } else {
+            showAlert("Failed to update employee.");
         }
     }
 
@@ -89,43 +89,19 @@ public class ManagerEmployeeController {
             return;
         }
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement("DELETE FROM employees WHERE id=?")){
-            stmt.setString(1, id);
-            stmt.executeUpdate();
+        if (dao.deleteEmployee(id)) {
             showSuccess("Employee deleted successfully!");
             clearFields();
             loadTable();
-        } catch (SQLException e) {
-
+        } else {
+            showAlert("Failed to delete employee.");
         }
     }
 
     public void loadTable() {
         ObservableList<EmployeeModel> list = FXCollections.observableArrayList();
-        try (Connection conn = DBConnection.getConnection();
-//             Statement stmt = conn.createStatement();
-//             ResultSet rs = stmt.executeQuery("SELECT * FROM employees");
-             ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM employees")){
-            while (rs.next()) {
-                list.add(new EmployeeModel(
-                        rs.getString("id"),
-                        rs.getString("name"),
-                        rs.getString("role")
-                ));
-            }
-            tableView.setItems(list);
-        } catch (SQLException e) {
-            showAlert("Error: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-    @FXML
-    public void initialize() {
-        idColumn.setCellValueFactory(c -> c.getValue().idProperty());
-        nameColumn.setCellValueFactory(c -> c.getValue().nameProperty());
-        roleColumn.setCellValueFactory(c -> c.getValue().roleProperty());
-        loadTable();
+        list.addAll(dao.getAllEmployees());
+        tableView.setItems(list);
     }
 
     private void clearFields() {
@@ -149,6 +125,7 @@ public class ManagerEmployeeController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
     @FXML
     private void switchToSuppliers(ActionEvent event) {
         try {
@@ -160,6 +137,7 @@ public class ManagerEmployeeController {
             e.printStackTrace();
         }
     }
+
     @FXML
     private void switchToSales(ActionEvent event) {
         try {
@@ -171,27 +149,27 @@ public class ManagerEmployeeController {
             e.printStackTrace();
         }
     }
+
     @FXML
     public void switchtoProducts(ActionEvent event) {
-        try{
-        Parent root = FXMLLoader.load(getClass().getResource("/View/ManagerProduct.fxml"));
-        stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        stage.setScene(new Scene(root));
-        stage.show();
-        }
-        catch (IOException e) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/View/ManagerProduct.fxml"));
+            stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
     @FXML
-    public void switchtoLogout(ActionEvent event){
+    public void switchtoLogout(ActionEvent event) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/View/Login.fxml"));
             stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
